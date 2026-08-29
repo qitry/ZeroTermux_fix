@@ -240,6 +240,20 @@ public final class TerminalRenderer {
             mTextPaint.setUnderlineText(underline);
             mTextPaint.setTextSkewX(italic ? -0.35f : 0.f);
             mTextPaint.setStrikeThruText(strikeThrough);
+            // ZeroTermux add {@
+            // Fake italic shears the glyph: with a negative skew the top of the glyph is pushed
+            // right while the bottom is pushed left. For tall glyphs (CJK and letters with a
+            // high ascender) that horizontal shift pushes the right half of the glyph under the
+            // following character, which covers/cuts it off. Widen the spacing between italic
+            // glyphs by exactly the amount of that shift so each glyph keeps its full width.
+            {
+                final float skewX = italic ? -0.35f : 0.f;
+                final float ascent = mTextPaint.ascent();
+                // Horizontal shift of the glyph top = |skewX| * |ascent| (in px). Convert to an
+                // em-relative letter spacing and add it so neighbouring glyphs don't overlap.
+                mTextPaint.setLetterSpacing(italic ? (Math.abs(skewX) * Math.abs(ascent) / mTextPaint.getTextSize()) : 0.f);
+            }
+            // @}
 			// ZeroTermux add {@
             //mTextPaint.setColor(foreColor);
             if (foreColor == -1) {
