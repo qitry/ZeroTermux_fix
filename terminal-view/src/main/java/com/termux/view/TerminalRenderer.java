@@ -254,8 +254,11 @@ public final class TerminalRenderer {
                 mTextPaint.setShadowLayer(radius, 1f, 1f, (alpha << 24) | 0x000000);
             }
 			// @}
+            canvas.save();
+            canvas.clipRect(0, y - mFontLineSpacingAndAscent, canvas.getWidth(), y);
             // The text alignment is the default Paint.Align.LEFT.
             canvas.drawText(text, startCharIndex, runWidthChars, left, y - mFontLineSpacingAndAscent, mTextPaint);
+            canvas.restore();
             // ZeroTermux add {@
             mTextPaint.setShadowLayer(0, 0, 0, 0);
 			// @}
