@@ -70,9 +70,6 @@ public final class TerminalRenderer {
         final int[] palette = mEmulator.mColors.mCurrentColors;
         final int cursorShape = mEmulator.getCursorStyle();
 
-        canvas.save();
-        canvas.clipRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
         if (reverseVideo)
             canvas.drawColor(palette[TextStyle.COLOR_INDEX_FOREGROUND], PorterDuff.Mode.SRC);
 
@@ -161,8 +158,6 @@ public final class TerminalRenderer {
             drawTextRun(canvas, line, palette, heightOffset, lastRunStartColumn, columnWidthSinceLastRun, lastRunStartIndex, charsSinceLastRun,
                 measuredWidthForRun, cursorColor, cursorShape, lastRunStyle, reverseVideo || invertCursorTextColor || lastRunInsideSelection);
         }
-
-        canvas.restore();
     }
 
     private void drawTextRun(Canvas canvas, char[] text, int[] palette, float y, int startColumn, int runWidthColumns,
