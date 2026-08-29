@@ -70,6 +70,9 @@ public final class TerminalRenderer {
         final int[] palette = mEmulator.mColors.mCurrentColors;
         final int cursorShape = mEmulator.getCursorStyle();
 
+        canvas.save();
+        canvas.clipRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
         if (reverseVideo)
             canvas.drawColor(palette[TextStyle.COLOR_INDEX_FOREGROUND], PorterDuff.Mode.SRC);
 
@@ -158,6 +161,8 @@ public final class TerminalRenderer {
             drawTextRun(canvas, line, palette, heightOffset, lastRunStartColumn, columnWidthSinceLastRun, lastRunStartIndex, charsSinceLastRun,
                 measuredWidthForRun, cursorColor, cursorShape, lastRunStyle, reverseVideo || invertCursorTextColor || lastRunInsideSelection);
         }
+
+        canvas.restore();
     }
 
     private void drawTextRun(Canvas canvas, char[] text, int[] palette, float y, int startColumn, int runWidthColumns,
@@ -195,12 +200,18 @@ public final class TerminalRenderer {
 
         mes = mes / mFontWidth;
         boolean savedMatrix = false;
-        if (Math.abs(mes - runWidthColumns) > 0.01) {
-            canvas.save();
-            canvas.scale(runWidthColumns / mes, 1.f);
-            left *= mes / runWidthColumns;
-            right *= mes / runWidthColumns;
-            savedMatrix = true;
+        if (mes > 0.01f && Math.abs(mes - runWidthColumns) > 0.01) {
+            float scale = runWidthColumns / mes;
+            // Guard against pathological measurement that would otherwise scale the
+            // run down to a tiny sliver (e.g. some italic/wide glyph metrics),
+            // which makes text disappear or collapse into a thin line.
+            if (scale > 0.2f && scale < 5.f) {
+                canvas.save();
+                canvas.scale(scale, 1.f);
+                left *= mes / runWidthColumns;
+                right *= mes / runWidthColumns;
+                savedMatrix = true;
+            }
         }
 
         if (backColor != palette[TextStyle.COLOR_INDEX_BACKGROUND]) {
